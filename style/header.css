@@ -5,12 +5,14 @@ header{
     padding: 0px 150px;
     background-color: #f8f9fa;
     height: 80px;
+    position: sticky;
+    transition: all 0.3s ease;
 }
 
 header .logo img {
     height: 100px;
     filter: sepia(1) hue-rotate(180deg) saturate(0) brightness();
-    
+    cursor: pointer;
 }
 
 header nav ul {
@@ -19,9 +21,19 @@ header nav ul {
     gap: 80px;
 }
 
+header nav ul li a:hover {
+    color:  #33ca95;
+    font-size: 18px;
+}
+
+header nav ul li a:active{
+    color:  #16bd80;
+}
+
 header nav ul li a {
     text-decoration: none;
     color: #333;
+    transition: all 0.3s ease;
 }
 
 header .login-btn, header .signup-btn {
@@ -29,7 +41,9 @@ header .login-btn, header .signup-btn {
     border: none;
     cursor: pointer;
     border-radius: 50px;
+    transition: all 0.3s ease;
 }
+
 
 /* header .login-btn {
     background-color: transparent;
@@ -41,4 +55,17 @@ header .signup-btn {
     background-color: #33ca95;
     color: white;
     /* border: 2px solid #007bff; */
+}
+
+header .signup-btn:hover {
+    background-color: #16bd80;
+}
+header .signup-btn:active{
+    background-color: #0fa46c;
+}
+header .login-btn:hover {
+    background-color: #d7d7d7;
+}
+header .login-btn:active{
+    background-color: #bcbcbc;
 }
