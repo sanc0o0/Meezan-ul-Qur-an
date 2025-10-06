@@ -1,0 +1,44 @@
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 150px;
+    background-color: #f8f9fa;
+    height: 80px;
+}
+
+header .logo img {
+    height: 100px;
+    filter: sepia(1) hue-rotate(180deg) saturate(3);
+    
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 80px;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: #333;
+}
+
+header .login-btn, header .signup-btn {
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    border-radius: 50px;
+}
+
+/* header .login-btn {
+    background-color: transparent;
+    color: #333;
+    border: 2px solid #333;
+} */
+
+header .signup-btn {
+    background-color: #33ca95;
+    color: white;
+    /* border: 2px solid #007bff; */
+}
