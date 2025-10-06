@@ -23,7 +23,7 @@ header nav ul {
 
 header nav ul li a:hover {
     color:  #33ca95;
-    font-size: 18px;
+    /* font-size: 18px; */
 }
 
 header nav ul li a:active{
