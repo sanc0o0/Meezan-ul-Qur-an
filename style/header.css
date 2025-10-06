@@ -9,7 +9,7 @@ header{
 
 header .logo img {
     height: 100px;
-    filter: sepia(1) hue-rotate(180deg) saturate(3);
+    filter: sepia(1) hue-rotate(180deg) saturate(0) brightness();
     
 }
 
