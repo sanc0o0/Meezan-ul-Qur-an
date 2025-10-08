@@ -47,7 +47,7 @@ section{
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     letter-spacing: 0.5px;
 }
 .get-started-btn:hover{

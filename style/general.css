@@ -5,3 +5,23 @@
     /* font-weight: 400; */
 
 }
+body{
+    position: relative;
+}
+
+/* setting primary, secondary, and tertiary color theme*/
+:root{
+    --primary-color: #14170C;
+    --secondary-color: #F4F7EE;
+    --tertiary-color: #144b2f;
+    --background-color: #BCCC8E;
+    --text-color: #8DAD48;
+}
+
+
+:root{
+    --head-font: 'Italiana', serif;
+    --p-font: 'Poppins', sans-serif;
+    --btn-font: 'Poppins', sans-serif;
+    
+}
