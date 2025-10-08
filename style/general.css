@@ -7,12 +7,15 @@
 }
 body{
     position: relative;
+    background-color: #f4f7eed2;
+    background-color: white;
 }
 
 /* setting primary, secondary, and tertiary color theme*/
 :root{
     --primary-color: #14170C;
     --secondary-color: #F4F7EE;
+    --accent-color: #062d1a;
     --tertiary-color: #144b2f;
     --background-color: #BCCC8E;
     --text-color: #8DAD48;
@@ -23,5 +26,19 @@ body{
     --head-font: 'Italiana', serif;
     --p-font: 'Poppins', sans-serif;
     --btn-font: 'Poppins', sans-serif;
-    
+
 }
+
+/* 'zuccini': {
+    '50': '#f0fdf5',
+    '100': '#ddfbea',
+    '200': '#bdf5d5',
+    '300': '#89ecb6',
+    '400': '#4eda8e',
+    '500': #26c16e,
+    '600': '#1a9f58',
+    '700': '#187d48',
+    '800': '#18633c',
+    '900': '#144b2f',
+    '950': '#062d1a',
+}, */

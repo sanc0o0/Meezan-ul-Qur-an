@@ -25,12 +25,12 @@ header nav ul {
 }
 
 header nav ul li a:hover {
-    color:  #33ca95;
+    color:  var(--accent-color);
     /* font-size: 18px; */
 }
 
 header nav ul li a:active{
-    color:  #16bd80;
+    color:  #0e4e22;
 }
 
 header nav ul li a {
@@ -63,8 +63,8 @@ header .signup-btn {
 }
 
 header .signup-btn:hover {
-    /* background-color: ; */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: var(--accent-color);
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
 }
 header .signup-btn:active{
     background-color: #0e4e22;
@@ -73,5 +73,5 @@ header .login-btn:hover {
     background-color: #d7d7d7;
 }
 header .login-btn:active{
-    background-color: #bcbcbc;
+    background-color: #e1e1e1;
 }
