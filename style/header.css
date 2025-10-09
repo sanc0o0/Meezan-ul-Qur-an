@@ -12,6 +12,7 @@ header{
 }
 
 header .logo img {
+    padding: 0 70px;
     margin-top: 10px;
     height: 110px;
     /* filter: sepia(1) hue-rotate(180deg) saturate(0) brightness(); */

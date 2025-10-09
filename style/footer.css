@@ -1,17 +1,29 @@
 footer {
   display: flex;
   flex-direction: column;
-    /* justify-content: space-between; */
-  height: 461px;
+    justify-content: space-between;
+  /* height: 461px; */
   background-color: var(--accent-color);
   background-color: #d0ced7;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+  bottom: 0;
+  overflow: hidden;
+}
+
+
+.footer-web-name{
+  /* margin-bottom: -20px; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
 }
 
 .footer-web-name h1 {
   bottom: 0;
 }
+
 .footer-web-name h1 {
   font-family: var(--p-font);
   font-family: "Italiana", serif;
@@ -33,7 +45,7 @@ footer {
 .footer-content{
     display: flex;
     flex-direction: column;
-    gap: 100%;
+    gap: 100px;
     justify-content: space-between;
 }
 
@@ -74,6 +86,10 @@ footer {
   color: var(--primary-color);
 }
 
+.right-nav nav a:hover{
+  color: var(--accent-color);
+  text-decoration: underline;
+}
 .whatsapp{
     padding: 10px;
     display: flex;
@@ -84,6 +100,9 @@ footer {
     width: 200px;
     height: 100px;
     border-radius: 15px;
+}
+.nav-whatsapp a{
+  text-decoration: none;
 }
 .whatsapp .icon img{
     height: 15px;
@@ -120,6 +139,7 @@ footer {
     flex-direction: row;
     /* justify-content: space-between; */
     gap: 40%;
+    padding: 0 10px;
 }
 
 .footer-content-bottom-left{
