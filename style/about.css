@@ -1,0 +1,101 @@
+/* Global Styling */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #ffffff;
+  color: #1c3a2b; /* dark green */
+  margin: 0;
+  padding: 0;
+  line-height: 1.7;
+}
+
+/* About Section */
+.about-section {
+  padding: 60px 20px;
+  text-align: center;
+  background: #f9fdf9;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #124d2b;
+  margin-bottom: 15px;
+}
+
+.intro {
+  max-width: 750px;
+  margin: 0 auto 40px;
+  font-size: 1.1rem;
+  color: #2f4f3f;
+}
+
+/* Cards */
+.about-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border: 2px solid #d3e8d3;
+  border-radius: 12px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 50, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #1c3a2b;
+}
+
+.card h2 {
+  color: #124d2b;
+  margin-bottom: 10px;
+}
+
+/* Auto-scroll Section */
+.scroll-section {
+  margin-top: 60px;
+  background-color: #124d2b;
+  padding: 20px 0;
+}
+
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 40px;
+  scroll-behavior: smooth;
+  align-items: center;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+.scroll-container img {
+  height: 80px;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-container img:hover {
+  opacity: 1;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .title {
+    font-size: 2rem;
+  }
+  .intro {
+    font-size: 1rem;
+  }
+  .scroll-container img {
+    height: 60px;
+  }
+}
