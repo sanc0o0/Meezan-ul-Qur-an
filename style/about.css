@@ -1,101 +1,146 @@
-/* Global Styling */
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--p-font);
+}
+
 body {
-  font-family: "Poppins", sans-serif;
-  background-color: #ffffff;
-  color: #1c3a2b; /* dark green */
-  margin: 0;
-  padding: 0;
-  line-height: 1.7;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    overflow-x: hidden;
 }
 
-/* About Section */
+/* ---------------- ABOUT SECTION ---------------- */
 .about-section {
-  padding: 60px 20px;
-  text-align: center;
-  background: #f9fdf9;
+    padding: 5rem 8%;
+    background-color: #fff;
 }
 
-.title {
-  font-size: 2.5rem;
-  color: #124d2b;
-  margin-bottom: 15px;
+.about-section .title {
+    font-family: var(--head-font);
+    font-size: 2.8rem;
+    text-align: center;
+    color: var(--accent-color);
+    margin-bottom: 1.5rem;
+    position: relative;
 }
 
-.intro {
-  max-width: 750px;
-  margin: 0 auto 40px;
-  font-size: 1.1rem;
-  color: #2f4f3f;
+.about-section .title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 3px;
+    background-color: var(--tertiary-color);
+    margin: 0.8rem auto 0;
+    border-radius: 5px;
 }
 
-/* Cards */
+.about-section .intro {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin: 0 auto 3rem;
+    max-width: 800px;
+}
+
+/* ---------------- CARDS ---------------- */
 .about-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 25px;
-  margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
 .card {
-  background: #ffffff;
-  border: 2px solid #d3e8d3;
-  border-radius: 12px;
-  padding: 25px;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 8px rgba(0, 50, 0, 0.1);
+    background-color: var(--secondary-color);
+    border-left: 5px solid var(--tertiary-color);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  border-color: #1c3a2b;
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    background-color: var(--accent-color);
+    color: var(--secondary-color);
 }
 
 .card h2 {
-  color: #124d2b;
-  margin-bottom: 10px;
+    color: var(--accent-color);
+    font-family: var(--head-font);
+    font-size: 1.6rem;
+    margin-bottom: 0.8rem;
+    transition: color 0.3s ease;
 }
 
-/* Auto-scroll Section */
+.card:hover h2 {
+    color: var(--text-color);
+}
+
+.card p {
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+/* ---------------- AUTO SCROLL SECTION ---------------- */
 .scroll-section {
-  margin-top: 60px;
-  background-color: #124d2b;
-  padding: 20px 0;
+    background-color: var(--secondary-color);
+    padding: 3rem 0;
+    overflow: hidden;
+    margin-top: 4rem;
+    border-top: 1px solid #ddd;
 }
 
 .scroll-container {
-  display: flex;
-  overflow-x: auto;
-  gap: 40px;
-  scroll-behavior: smooth;
-  align-items: center;
-  white-space: nowrap;
-  padding: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    animation: scrollLeft 20s linear infinite;
+}
+
+.scroll-container:hover {
+    animation-play-state: paused;
 }
 
 .scroll-container img {
-  height: 80px;
-  filter: brightness(0) invert(1);
-  opacity: 0.9;
-  transition: opacity 0.3s ease;
+    height: 70px;
+    filter: grayscale(100%);
+    opacity: 0.8;
+    transition: all 0.3s ease;
 }
 
 .scroll-container img:hover {
-  opacity: 1;
+    filter: grayscale(0);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
-.scroll-container::-webkit-scrollbar {
-  display: none;
+@keyframes scrollLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .title {
-    font-size: 2rem;
-  }
-  .intro {
-    font-size: 1rem;
-  }
-  .scroll-container img {
-    height: 60px;
-  }
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 768px) {
+    .about-section {
+        padding: 3rem 5%;
+    }
+
+    .about-section .title {
+        font-size: 2.2rem;
+    }
+
+    .intro {
+        font-size: 1rem;
+    }
+
+    .scroll-container img {
+        height: 55px;
+    }
 }
