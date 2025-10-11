@@ -20,6 +20,10 @@ body {
 .auth-section {
   width: 100%;
   padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
 }
 
 .auth-container {
@@ -30,6 +34,7 @@ body {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+  border-left-color: var(--accent-color);
 }
 
 /* LEFT SIDE */
