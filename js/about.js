@@ -17,3 +17,4 @@ scrollBox.addEventListener("mouseenter", () => (isHovering = true));
 scrollBox.addEventListener("mouseleave", () => (isHovering = false));
 
 autoScroll();
+
