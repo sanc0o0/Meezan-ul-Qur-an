@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Poppins:wght@300;400;500;600&display=swap');
+
 header{
     display: flex;
     justify-content: space-between;
@@ -38,6 +41,7 @@ header nav ul li a {
     text-decoration: none;
     color: #333;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 header .login-btn, header .signup-btn {

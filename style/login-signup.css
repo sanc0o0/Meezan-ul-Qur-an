@@ -13,17 +13,40 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
+
 /* -------- AUTH SECTION -------- */
+.back-btn{
+  font-family: var(--p-font);
+  padding: 14px 32px;
+    border: none;
+    cursor: pointer;
+    /*inner shadow effect for buttons with explaination*/
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+.back-btn:hover{
+  background-color: #0e4e22;
+  color: var(--secondary-color );
+}
+
+.back-btn-container{
+  /* background-color: blue; */
+  display: flex;
+  width: 100%;
+
+}
 .auth-section {
   width: 100%;
-  padding: 2rem;
+  padding: 20px ;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: flex-start;
   align-items: center;
-  
+
 }
 
 .auth-container {
