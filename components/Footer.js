@@ -16,7 +16,7 @@ const Footer = () => {
                 alt="Meezan-ul-Quran Logo"
                 width={120}
                 height={60}
-                className="h-30 w-auto object-contain"
+                className=" object-contain"
               />
             </Link>
 
