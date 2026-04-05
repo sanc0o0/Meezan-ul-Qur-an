@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import StudentCard from "../components/StudentCard";
+import { Analytics } from "@vercel/analytics/next";
 const Home = () => {
   useEffect(() => {
     const sections = document.querySelectorAll(".reveal");
@@ -141,6 +142,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <Analytics />
     </>
   );
 };
