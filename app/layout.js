@@ -3,10 +3,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Maktab Meezan ul Qur’an",
+  title: "Maktab Meezan ul Qur'an",
   description:
-    "A platform dedicated to understanding the Qur’an with clarity, depth and balance.",
-};
+    "A platform dedicated to understanding the Qur'an with clarity, depth and balance.",
+  };
 
 export default function RootLayout({ children }) {
   return (
