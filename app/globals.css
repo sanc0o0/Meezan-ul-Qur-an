@@ -115,6 +115,7 @@
 
   button:hover {
     background-color: var(--color-primary-600);
+    cursor: pointer;
   }
 }
 

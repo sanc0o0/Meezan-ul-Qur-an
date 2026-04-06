@@ -112,9 +112,12 @@ const Home = () => {
                   name: "Shujauddin Ansari",
                   image: "/students/shujauddin.jpg",
                 },
-                { name: "Abdullah Khan", image: "/students/shujauddin.jpg" },
-                { name: "Fatima Noor", image: "/students/shujauddin.jpg" },
-                { name: "Yusuf Ali", image: "/students/shujauddin.jpg" },
+                { name: "Adnan Meraj", image: "/students/adnan.jpeg" },
+                { name: "Kaunain Muzammil", image: "/students/kaunain.jpeg" },
+                { name: "Atif Ziyauddin", image: "/students/atif.jpeg" },
+                { name: "Wasiullah Yousuf", image: "/students/nirale.jpeg" },
+                { name: "Sharfe Badr-e-Alam", image: "/students/sharfe.jpeg" },
+                { name: "mehrab Abdul Quddus", image: "/students/mehrab.jpeg" },
               ].map((student, index) => (
                 <span key={index} className="mx-4 inline-block">
                   <StudentCard name={student.name} image={student.image} />
@@ -129,9 +132,12 @@ const Home = () => {
                   name: "Shujauddin Ansari",
                   image: "/students/shujauddin.jpg",
                 },
-                { name: "Abdullah Khan", image: "/students/shujauddin.jpg" },
-                { name: "Fatima Noor", image: "/students/shujauddin.jpg" },
-                { name: "Yusuf Ali", image: "/students/shujauddin.jpg" },
+                { name: "Adnan Meraj", image: "/students/adnan.jpeg" },
+                { name: "Kaunain Muzammil", image: "/students/kaunain.jpeg" },
+                { name: "Atif Ziyauddin", image: "/students/atif.jpeg" },
+                { name: "Wasiullah Yousuf", image: "/students/nirale.jpeg" },
+                { name: "Sharfe Badr-e-Alam", image: "/students/sharfe.jpeg" },
+                { name: "mehrab Abdul Quddus", image: "/students/mehrab.jpeg" },
               ].map((student, index) => (
                 <span key={"dup-" + index} className="mx-4 inline-block">
                   <StudentCard name={student.name} image={student.image} />
@@ -141,7 +147,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
     </>
   );
 };

@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
       </h1>
 
       <p className="mb-6 leading-relaxed">
-        At <strong>Maktab Meezan-ul-Qur’an</strong>, we respect your privacy and
+        At <strong>Maktab Meezan-ul-Qur&apos;an</strong>, we respect your privacy and
         are committed to protecting any personal information you provide while
         using our website.
       </p>
