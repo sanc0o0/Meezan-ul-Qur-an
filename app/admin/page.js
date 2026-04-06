@@ -91,8 +91,8 @@ export default function AdminPage() {
 
             {/* Expandable Details */}
             {openId === p._id && (
-              <div className="border-t p-4 rounded-b-xl bg-gray-50 text-sm">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="border-t p-4 rounded-b-xl overflow-hidden bg-gray-50 text-sm">
+                <div className="grid grid-cols-2 gap-2 p-4">
                   <p className="text-gray-500">Email:</p>
                   <p>{p.email}</p>
 
