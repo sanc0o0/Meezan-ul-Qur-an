@@ -1,9 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [payments, setPayments] = useState([]);
   const [openId, setOpenId] = useState(null);
+
+  useEffect(() => {
+    const isAuth = localStorage.getItem("admin_auth");
+    if (!isAuth) {
+      router.push("/admin/login");
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -78,11 +88,7 @@ export default function AdminPage() {
 
                 {/* Arrow */}
                 <img
-                  src={
-                    openId === p._id
-                      ? "/arrowUp.png"
-                      : "/arrowDown.png"
-                  }
+                  src={openId === p._id ? "/arrowUp.png" : "/arrowDown.png"}
                   alt="toggle"
                   className="w-4 h-4"
                 />
@@ -92,7 +98,9 @@ export default function AdminPage() {
             {/* Expandable Details */}
             {openId === p._id && (
               <div className="border-t p-4 rounded-b-xl overflow-hidden bg-gray-50 text-sm">
-                <div className="grid grid-cols-2 gap-2 p-4">
+                {/* Desktop view */}
+
+                <div className="hidden md:grid grid-cols-2 gap-2 p-4">
                   <p className="text-gray-500">Email:</p>
                   <p>{p.email}</p>
 
@@ -110,6 +118,43 @@ export default function AdminPage() {
 
                   <p className="text-gray-500">Receipt ID:</p>
                   <p>{p._id}</p>
+                </div>
+
+                {/* Mobile view */}
+                <div className="md:hidden space-y-3">
+                  <div>
+                    <p className="text-gray-500">Email:</p>
+                    <p className="font-medium break-all">{p.email}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Amount:</p>
+                    <p className="font-medium">₹{p.amount}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Status:</p>
+                    <p className="font-medium capitalize">{p.status}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Date:</p>
+                    <p className="font-medium">
+                      {new Date(p.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Payment ID:</p>
+                    <p className="font-medium break-all">
+                      {p.razorpay_payment_id || "N/A"}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-gray-500">Receipt ID:</p>
+                    <p className="font-medium break-all">{p._id}</p>
+                  </div>
                 </div>
               </div>
             )}

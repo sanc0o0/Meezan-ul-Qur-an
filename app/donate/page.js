@@ -117,11 +117,16 @@ export default function Donate() {
       </div>
 
       {/* Donation Cards */}
-      <div className="grid md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
         {amounts.map((amt) => (
           <button
             key={amt}
-            onClick={() => setAmount(amt)}
+            onClick={() => {
+              setAmount(amt);
+              document.getElementById("donation-form")?.scrollIntoView({ 
+                behavior: "smooth",
+              });
+            }}
             className="bg-background-50 border border-primary-200 rounded-xl py-8 shadow-sm hover:shadow-md hover:border-primary-500 transition"
           >
             <p className="text-2xl font-semibold text-primary-700">₹{amt}</p>
@@ -131,7 +136,7 @@ export default function Donate() {
       </div>
 
       {/* Custom Donation */}
-      <div className="max-w-md mx-auto text-center">
+      <div id="donation-form" className="max-w-md mx-auto text-center">
         <p className="text-text-700 mb-4">Enter your details</p>
 
         <input
