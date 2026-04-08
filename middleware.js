@@ -1,34 +1,33 @@
 import { NextResponse } from "next/server";
+// import jwt from "jsonwebtoken";
 
 export function middleware(req) {
-  const auth = req.headers.get("authorization");
+  const { pathname } = req.nextUrl;
+  // const SECRET = process.env.JWT_SECRET;
+  // console.log("SECRET:", SECRET);
 
-  if (!auth) {
-    return new Response("Auth required", {
-      status: 401,
-      headers: {
-        "WWW-Authenticate": "Basic realm='Secure Area'",
-      },
-    });
-  }
-
-  const base64Credentials = auth.split(" ")[1];
-  const credentials = Buffer.from(base64Credentials, "base64").toString(
-    "ascii",
-  );
-
-  const [username, password] = credentials.split(":");
-
-  if (
-    username === process.env.ADMIN_USER &&
-    password === process.env.ADMIN_PASS
-  ) {
+  if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
-  return new Response("Access Denied", { status: 403 });
+  if (pathname.startsWith("/admin")) {
+    const token = req.cookies.get("adminToken")?.value;
+
+    if (!token) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+
+  //   try {
+  //     jwt.verify(token, SECRET);
+  //   } catch {
+  //     return NextResponse.redirect(new URL("/admin/login", req.url));
+  //   }
+  return NextResponse.next();
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin"],
+  matcher: ["/admin/:path*"],
 };

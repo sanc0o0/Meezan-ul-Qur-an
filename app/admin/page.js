@@ -8,22 +8,27 @@ export default function AdminPage() {
   const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
-    const isAuth = localStorage.getItem("admin_auth");
-    if (!isAuth) {
-      router.push("/admin/login");
-    }
-  }, []);
-
-
-  useEffect(() => {
     const fetchPayments = async () => {
       const res = await fetch("/api/verify-payment");
+
+      if (res.status === 401) {
+        router.push("/");
+        return;
+      }
+
       const data = await res.json();
       setPayments(data);
     };
 
     fetchPayments();
   }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", {
+      method: "POST",
+    });
+    router.push("/");
+  };
 
   // Stats
   const total = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -35,15 +40,23 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Header */}
-      <h1 className="text-3xl font-bold text-center mb-10">
-        Donations Dashboard
-      </h1>
+      
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-3xl font-bold">Donations Dashboard</h1>
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+        >
+          Logout
+        </button>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-        <div className="bg-green-50 p-4 rounded-xl shadow">
+        <div className="bg-green-50 p-5 rounded-2xl shadow-sm">
           <p className="text-sm text-gray-500">Total</p>
           <h2 className="text-xl font-bold text-green-700">₹{total}</h2>
         </div>
@@ -66,7 +79,7 @@ export default function AdminPage() {
             {/* Row */}
             <div
               onClick={() => toggle(p._id)}
-              className="flex justify-between items-center p-4 cursor-pointer hover:rounded-xl hover:bg-gray-50"
+              className="flex justify-between items-center p-4 cursor-pointer hover:rounded-xl hover:bg-gray-50 transition"
             >
               <div>
                 <p className="font-semibold">{p.name}</p>

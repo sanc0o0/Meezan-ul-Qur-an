@@ -53,6 +53,15 @@ const Navbar = () => {
 
           <li>
             <Link
+              href="/admin"
+              className="hover:text-primary-600 transition-colors duration-200"
+            >
+              Dashboard
+            </Link>
+          </li>
+
+          <li>
+            <Link
               href="/donate"
               className="bg-primary-800 text-white px-5 py-2 rounded-lg hover:bg-primary-600 transition duration-200"
             >
@@ -99,6 +108,13 @@ const Navbar = () => {
             className="hover:text-primary-600 transition"
           >
             Contact
+          </Link>
+          <Link
+            href="/admin"
+            onClick={closeMobileMenu}
+            className="hover:text-primary-600 transition"
+          >
+            Dashboard
           </Link>
 
           <Link

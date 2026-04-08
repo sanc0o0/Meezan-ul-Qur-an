@@ -2,6 +2,20 @@ import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import Payment from "@/models/Payment";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
+
+function verifyAdmin(req) {
+  const token = req.cookies.get("adminToken")?.value;
+
+  if (!token) return false;
+
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(req) {
   try {
@@ -128,7 +142,12 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
+export async function GET(req) {
+  const isAdmin = verifyAdmin(req);
+
+  if (!isAdmin) {
+    return Response.json({ message: "Unauthorized" }, { status: 401 });
+  }
   await connectDB();
 
   const payments = await Payment.find().sort({ createdAt: -1 });
