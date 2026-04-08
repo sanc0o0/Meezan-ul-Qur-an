@@ -24,7 +24,12 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.push("/admin");
+        // setTimeout(() => {
+        //   window.location.href = "/admin";
+        //   router.refresh();
+        // }, 200);
+        router.replace("/admin");
+        router.refresh();
       } else {
         setError("You are not authorized to accesss dashboard!");
       }

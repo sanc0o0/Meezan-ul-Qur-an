@@ -9,10 +9,13 @@ export default function AdminPage() {
 
   useEffect(() => {
     const fetchPayments = async () => {
-      const res = await fetch("/api/verify-payment");
+      const res = await fetch("/api/verify-payment", {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (res.status === 401) {
-        router.push("/");
+        router.push("/admin/login");
         return;
       }
 
@@ -27,7 +30,7 @@ export default function AdminPage() {
     await fetch("/api/admin/logout", {
       method: "POST",
     });
-    router.push("/");
+    window.location.href = "/admin/login";
   };
 
   // Stats
@@ -42,7 +45,7 @@ export default function AdminPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Header */}
-      
+
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-3xl font-bold">Donations Dashboard</h1>
 
@@ -74,6 +77,9 @@ export default function AdminPage() {
 
       {/* List UI */}
       <div className="space-y-4">
+        {payments.length === 0 && (
+          <p className="text-center text-gray-500">No donations yet</p>
+        )}
         {payments.map((p) => (
           <div key={p._id} className="bg-white rounded-xl shadow border">
             {/* Row */}

@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Payment from "@/models/Payment";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
 function verifyAdmin(req) {
   const token = req.cookies.get("adminToken")?.value;
@@ -42,6 +43,10 @@ export async function POST(req) {
         },
         { returnDocument: "after" },
       );
+      
+      if (!payment) {
+        return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+      }
 
       try {
         const transporter = nodemailer.createTransport({
@@ -87,7 +92,7 @@ export async function POST(req) {
                   <table style="width:100%; font-size:14px; border-collapse:collapse;">
                     <tr>
                       <td style="padding:8px 0; color:#555;">Payment ID:</td>
-                      <td style="padding:8px 0;"><b>${payment.razorpay_payment_id || "N/A" }</b></td>
+                      <td style="padding:8px 0;"><b>${payment.razorpay_payment_id || "N/A"}</b></td>
                     </tr>
                     <tr>
                       <td style="padding:8px 0; color:#555;">Date:</td>
@@ -127,18 +132,18 @@ export async function POST(req) {
         console.error("Email sending failed:", err);
       }
 
-      return Response.json({ success: true });
+      return NextResponse.json({ success: true });
     } else {
       await Payment.findOneAndUpdate(
         { razorpay_order_id },
         { status: "failed" },
       );
 
-      return Response.json({ success: false }, { status: 400 });
+      return NextResponse.json({ success: false }, { status: 400 });
     }
   } catch (err) {
     console.error(err);
-    return Response.json({ error: "Verification failed" }, { status: 500 });
+    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }
 }
 
@@ -146,11 +151,13 @@ export async function GET(req) {
   const isAdmin = verifyAdmin(req);
 
   if (!isAdmin) {
-    return Response.json({ message: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
   await connectDB();
 
   const payments = await Payment.find().sort({ createdAt: -1 });
 
-  return Response.json(payments);
+  return NextResponse.json(payments);
 }
+
