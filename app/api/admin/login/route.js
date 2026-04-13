@@ -1,37 +1,26 @@
+// app/api/admin/login/route.js
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 export async function POST(req) {
   const { username, password } = await req.json();
 
-  
   if (
-    username === process.env.ADMIN_USER &&
-    password === process.env.ADMIN_PASS
+    username === process.env.ADMIN_USERNAME &&
+    password === process.env.ADMIN_PASSWORD
   ) {
-    
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing in environment variables");
-    }
+    const res = NextResponse.json({ success: true });
 
-    const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-     
-
-
-    const response = NextResponse.json({ success: true });
-
-    response.cookies.set("adminToken", token, {
+    res.cookies.set("admin_token", process.env.ADMIN_SECRET_TOKEN, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 8, // 8 hours
       path: "/",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 1 day
     });
 
-    return response;
+    return res;
   }
 
-  return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }

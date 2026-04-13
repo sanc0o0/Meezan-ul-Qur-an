@@ -1,30 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function AdminPage() {
   const router = useRouter();
   const [payments, setPayments] = useState([]);
   const [openId, setOpenId] = useState(null);
 
-  useEffect(() => {
-    const fetchPayments = async () => {
-      const res = await fetch("/api/verify-payment", {
-        method: "GET",
-        credentials: "include",
-      });
+  // useEffect(() => {
+  //   const fetchPayments = async () => {
+  //     const res = await fetch("/api/verify-payment", {
+  //       method: "GET",
+  //       credentials: "include",
+  //     });
 
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
+  //     if (res.status === 401) {
+  //       router.push("/admin/login");
+  //       return;
+  //     }
 
-      const data = await res.json();
-      setPayments(data);
-    };
+  //     const data = await res.json();
+  //     setPayments(data);
+  //   };
 
-    fetchPayments();
-  }, []);
+  //   fetchPayments();
+  // }, []);
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", {
@@ -106,10 +107,11 @@ export default function AdminPage() {
                 </span>
 
                 {/* Arrow */}
-                <img
+                <Image
                   src={openId === p._id ? "/arrowUp.png" : "/arrowDown.png"}
                   alt="toggle"
-                  className="w-4 h-4"
+                  width={16}
+                  height={16}
                 />
               </div>
             </div>
