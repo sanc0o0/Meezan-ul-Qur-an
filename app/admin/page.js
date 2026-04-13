@@ -8,24 +8,24 @@ export default function AdminPage() {
   const [payments, setPayments] = useState([]);
   const [openId, setOpenId] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchPayments = async () => {
-  //     const res = await fetch("/api/verify-payment", {
-  //       method: "GET",
-  //       credentials: "include",
-  //     });
+  useEffect(() => {
+    const fetchPayments = async () => {
+      const res = await fetch("/api/verify-payment", {
+        method: "GET",
+        credentials: "include",
+      });
 
-  //     if (res.status === 401) {
-  //       router.push("/admin/login");
-  //       return;
-  //     }
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
 
-  //     const data = await res.json();
-  //     setPayments(data);
-  //   };
+      const data = await res.json();
+      setPayments(data);
+    };
 
-  //   fetchPayments();
-  // }, []);
+    fetchPayments();
+  }, []);
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", {

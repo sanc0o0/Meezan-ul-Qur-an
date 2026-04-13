@@ -2,20 +2,12 @@ import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import Payment from "@/models/Payment";
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 function verifyAdmin(req) {
-  const token = req.cookies.get("adminToken")?.value;
-
+  const token = req.cookies.get("admin_token")?.value;
   if (!token) return false;
-
-  try {
-    jwt.verify(token, process.env.JWT_SECRET);
-    return true;
-  } catch {
-    return false;
-  }
+  return token === process.env.ADMIN_SECRET_TOKEN;
 }
 
 export async function POST(req) {
