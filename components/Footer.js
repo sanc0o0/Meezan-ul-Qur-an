@@ -63,6 +63,15 @@ const Footer = () => {
                   Contact
                 </Link>
               </li>
+
+              <li>
+                <Link
+                  href="/admin"
+                  className="hover:text-primary-600 transition-colors duration-200"
+                >
+                  Dashboard
+                </Link>
+              </li>
             </ul>
           </div>
 
