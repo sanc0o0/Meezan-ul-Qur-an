@@ -12,8 +12,16 @@ const Navbar = () => {
   return (
     <nav className="bg-background-100 text-text-900 shadow-md h-20">
       <div className="max-w-7xl mx-auto px-6 h-full flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center">
+        {/* Mobile Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden px-3 py-2 text-primary-100 text-1.5xl"
+        >
+          {isMobileMenuOpen ? "✕" : "☰"}
+        </button>
+
+        {/* CENTER: Logo (desktop only) */}
+        <div className="hidden md:not-last:flex items-center">
           <Link href="/">
             <Image
               src={logo}
@@ -22,51 +30,32 @@ const Navbar = () => {
             />
           </Link>
         </div>
-        {/* Nav Links */}
+
+        {/* RIGHT: Donate button (mobile) */}
+        <div className="md:hidden">
+          <Link
+            href="/donate"
+            onClick={closeMobileMenu}
+            className="bg-primary-800 font-semibold text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition"
+          >
+            DONATE
+          </Link>
+        </div>
+
+        {/* Desktop Nav */}
         <ul className="hidden md:flex items-center gap-8 font-medium">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-primary-600 transition-colors duration-200"
-            >
-              Home
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href="/about"
-              className="hover:text-primary-600 transition-colors duration-200"
-            >
-              About
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href="/contact"
-              className="hover:text-primary-600 transition-colors duration-200"
-            >
-              Contact
-            </Link>
-          </li>
-
+          <li><Link href="/">Home</Link></li>
+          <li><Link href="/about">About</Link></li>
+          <li><Link href="/contact">Contact</Link></li>
           <li>
             <Link
               href="/donate"
-              className="bg-primary-800 text-white px-5 py-2 rounded-lg hover:bg-primary-600 transition duration-200"
+              className="bg-primary-800 text-white px-5 py-2 rounded-lg"
             >
               DONATE
             </Link>
           </li>
         </ul>
-        {/* Mobile Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden px-3 py-2 text-primary-100 text-1.5xl"
-        >
-          {isMobileMenuOpen ? "✕" : "☰"}
-        </button>
       </div>
       {/* Mobile Menu */}
       <div
@@ -77,6 +66,16 @@ const Navbar = () => {
         }`}
       >
         <div className="flex flex-col items-center gap-6 py-6 font-medium">
+          <div className="flex items-center">
+            <Link href="/">
+              <Image
+                src={logo}
+                alt="Meezan-ul-Quran Logo"
+                className="h-30 w-auto object-contain"
+              />
+            </Link>
+          </div>
+
           <Link
             href="/"
             onClick={closeMobileMenu}
@@ -99,15 +98,8 @@ const Navbar = () => {
             className="hover:text-primary-600 transition"
           >
             Contact
-          </Link>        
-
-          <Link
-            href="/donate"
-            onClick={closeMobileMenu}
-            className="bg-primary-800 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition"
-          >
-            DONATE
           </Link>
+
         </div>
       </div>
     </nav>
