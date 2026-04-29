@@ -35,8 +35,10 @@ export default function AdminPage() {
   };
 
   // Stats
-  const total = payments.reduce((sum, p) => sum + p.amount, 0);
-  const success = payments.filter((p) => p.status === "paid").length;
+  const paidPayments = payments.filter((p) => p.status === "paid");
+
+  const total = paidPayments.reduce((sum, p) => sum + p.amount, 0);
+  const success = paidPayments.length;
   const failed = payments.filter((p) => p.status === "failed").length;
 
   const toggle = (id) => {
