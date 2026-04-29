@@ -150,6 +150,19 @@ export async function GET(req) {
 
   const payments = await Payment.find().sort({ createdAt: -1 });
 
-  return NextResponse.json(payments);
+  const paidPayments = payments.filter(p => p.status === "paid");
+
+  const totalPaid = paidPayments.reduce((sum, p) => sum + Number( p.amount), 0);
+  const successCount = paidPayments.length;
+  const failedCount = payments.filter(p => p.status === "failed").length;
+
+  return NextResponse.json({
+    payments,
+    stats: {
+      totalPaid,
+      successCount,
+      failedCount,
+    },
+  });
 }
 
