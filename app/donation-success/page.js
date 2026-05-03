@@ -1,4 +1,6 @@
 import ShareButton from "./ShareButton";
+import Image from "next/image";
+import logo from "../../public/logo.png";
 
 export default async function SuccessPage({ searchParams }) {
   const params = await searchParams;
@@ -12,9 +14,13 @@ export default async function SuccessPage({ searchParams }) {
     <div className="min-h-screen bg-background-50 flex flex-col items-center justify-center px-6 py-16">
       {/* Card */}
       <div className="bg-white rounded-2xl shadow-xl border border-primary-100 max-w-md w-full px-8 py-10 text-center">
-        {/* Icon */}
-        <div className="w-16 h-16 bg-green-50 border-2 border-green-200 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
-          ✅
+        <div className="w-30 h-30 bg-white border border-green-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+          <Image
+            src={logo}
+            alt="Meezan-ul-Quran Logo"
+            className="w-30 h-30 object-contain"
+            priority
+          />
         </div>
 
         <h1 className="text-2xl font-bold text-primary-800 mb-2">
@@ -22,7 +28,7 @@ export default async function SuccessPage({ searchParams }) {
         </h1>
         <p className="text-text-500 text-sm leading-relaxed mb-6">
           Your donation has been received. May Allah accept it as sadaqah
-          jariyah and reward you abundantly — in this life and the next.
+          jariyah and reward you abundantly — in this life and the Akhirah.
         </p>
 
         {/* Transaction Detail */}

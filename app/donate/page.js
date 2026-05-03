@@ -16,9 +16,9 @@ const TRUST_POINTS = [
     desc: "Rooted in traditional Qur'anic scholarship and ijazah-based teaching.",
   },
   {
-    icon: "📜",
-    title: "Fully Registered Institution",
-    desc: "Maktab Meezan-ul-Qur'an is a registered educational trust.",
+    icon: "👶",
+    title: "Supporting Students in Need",
+    desc: "Your contribution helps children access Qur'anic education regardless of financial background.",
   },
   {
     icon: "🔒",
@@ -49,10 +49,18 @@ export default function Donate() {
       return () => clearTimeout(timer);
     }
   }, [status]);
+  useEffect(() => {
+    if (loading) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth", // or "auto" if you want instant
+      });
+    }
+  }, [loading]);
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-background-50">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background-50">
         <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
         <p className="text-sm text-text-600 font-medium tracking-wide">
           Opening secure payment gateway…
