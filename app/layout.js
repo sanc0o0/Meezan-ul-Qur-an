@@ -13,7 +13,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={"antialiased min-h-screen flex flex-col bg-background-50 text-text-900"}
+        className={
+          "antialiased min-h-screen flex flex-col bg-background-50 text-text-900"
+        }
       >
         <Navbar />
 
@@ -21,6 +23,10 @@ export default function RootLayout({ children }) {
 
         <Footer />
         <Analytics />
+        <script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          async
+        ></script>
       </body>
     </html>
   );

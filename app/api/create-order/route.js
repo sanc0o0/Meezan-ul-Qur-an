@@ -20,22 +20,13 @@ export async function POST(req) {
     const order = await razorpay.orders.create(options);
 
     await connectDB();
-    const existing = await Payment.findOne({
-      email,
-      amount,
-      status: "created",
-    });
-
-    if (existing) {
-      return Response.json(existing);
-    }
-
-    // ✅ Save initial payment
+   
     await Payment.create({
       name,
       email,
       amount,
       razorpay_order_id: order.id,
+      razorpay_amount: order.amount,
       status: "created",
     });
 
