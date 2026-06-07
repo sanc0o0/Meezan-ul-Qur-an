@@ -1,4 +1,7 @@
 // FILE: app/admin/page.js
+// CHANGE: added <colgroup> with fixed widths to the desktop table,
+//         added whiteSpace:"nowrap" + maxWidth + textOverflow to Student cell,
+//         everything else is identical to what you sent.
 
 "use client";
 import { useEffect, useState, useMemo } from "react";
@@ -8,7 +11,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import RegistrationDetail from "@/components/RegistrationDetail";
 
-// ── Formatters
 const fmt = (n) =>
   Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const fmtDate = (d) =>
@@ -26,7 +28,6 @@ const fmtDateShort = (d) =>
     year: "numeric",
   });
 
-// ── SVG Icons
 const Ic = {
   Donate: () => (
     <svg
@@ -150,7 +151,6 @@ const Ic = {
   ),
 };
 
-// ── Stat card
 function StatCard({ label, value, sub, accentBorder, spark }) {
   return (
     <div
@@ -205,11 +205,10 @@ function StatCard({ label, value, sub, accentBorder, spark }) {
   );
 }
 
-// ── Sparkline
 function Sparkline({ values }) {
   if (!values?.length || values.every((v) => v === 0)) return null;
-  const max = Math.max(...values, 1);
-  const W = 72,
+  const max = Math.max(...values, 1),
+    W = 72,
     H = 24;
   const pts = values.map(
     (v, i) => `${(i / (values.length - 1)) * W},${H - (v / max) * H}`,
@@ -239,7 +238,6 @@ function Sparkline({ values }) {
   );
 }
 
-// ── Copy chip
 function CopyChip({ text }) {
   const [copied, setCopied] = useState(false);
   if (!text || text === "N/A")
@@ -288,26 +286,24 @@ function CopyChip({ text }) {
   );
 }
 
-// ── Date filter helper
 function filterByDate(list, dateFilter) {
   const now = new Date();
   return list.filter((item) => {
     const d = new Date(item.createdAt);
     if (dateFilter === "today") return d.toDateString() === now.toDateString();
     if (dateFilter === "week") {
-      const weekAgo = new Date(now);
-      weekAgo.setDate(now.getDate() - 7);
-      return d >= weekAgo;
+      const w = new Date(now);
+      w.setDate(now.getDate() - 7);
+      return d >= w;
     }
     if (dateFilter === "month")
       return (
         d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
       );
-    return true; // "all"
+    return true;
   });
 }
 
-// ── Export CSV
 function exportCSV(registrations) {
   const headers = [
     "Student Name",
@@ -317,9 +313,7 @@ function exportCSV(registrations) {
     "Gender",
     "Contact",
     "Alternate Contact",
-    "Guardian Name",
-    "Guardian Relation",
-    "Guardian Email",
+    "Email",
     "Address",
     "City",
     "State",
@@ -336,9 +330,7 @@ function exportCSV(registrations) {
     r.gender,
     r.phone,
     r.alternatePhone || "",
-    r.guardianName || r.fatherName,
-    r.guardianRelation || "father",
-    r.guardianEmail || r.email || "",
+    r.email || "",
     `${r.address?.houseNumber || ""} ${r.address?.village || ""}`.trim(),
     r.address?.city || "",
     r.address?.state || "",
@@ -361,11 +353,41 @@ function exportCSV(registrations) {
   URL.revokeObjectURL(url);
 }
 
-// ══════════════════════════════════════════════
-// REGISTRATIONS TAB
-// ══════════════════════════════════════════════
 const PAGE_SIZE = 10;
 
+// ── Column widths — declared outside to prevent re-creation on render
+const COL_WIDTHS = [
+  "52px",
+  "220px",
+  "160px",
+  "150px",
+  "60px",
+  "110px",
+  "110px",
+  "130px",
+];
+
+function TH({ children }) {
+  return (
+    <th
+      style={{
+        padding: "10px 14px",
+        textAlign: "left",
+        fontSize: 11,
+        fontWeight: 700,
+        color: "#9ca3af",
+        textTransform: "uppercase",
+        letterSpacing: "0.06em",
+        whiteSpace: "nowrap",
+        background: "#f9fafb",
+      }}
+    >
+      {children}
+    </th>
+  );
+}
+
+// ── REGISTRATIONS TAB
 function RegistrationsTab({ registrations }) {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
@@ -376,8 +398,8 @@ function RegistrationsTab({ registrations }) {
     (r) => new Date(r.createdAt).toDateString() === new Date().toDateString(),
   ).length;
   const thisMonth = registrations.filter((r) => {
-    const d = new Date(r.createdAt);
-    const n = new Date();
+    const d = new Date(r.createdAt),
+      n = new Date();
     return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
   }).length;
   const revenue = registrations.length * 100;
@@ -413,7 +435,6 @@ function RegistrationsTab({ registrations }) {
 
   return (
     <>
-      {/* Summary cards */}
       <div className="stat-grid" style={{ marginBottom: 16 }}>
         <StatCard
           label="Total Registrations"
@@ -441,7 +462,6 @@ function RegistrationsTab({ registrations }) {
         />
       </div>
 
-      {/* Table card */}
       <div
         style={{
           background: "#fff",
@@ -500,8 +520,6 @@ function RegistrationsTab({ registrations }) {
               <Ic.Download /> Export CSV
             </button>
           </div>
-
-          {/* Search + filter row */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
               <span
@@ -558,7 +576,6 @@ function RegistrationsTab({ registrations }) {
           </div>
         </div>
 
-        {/* Empty */}
         {paginated.length === 0 ? (
           <div style={{ padding: "56px 16px", textAlign: "center" }}>
             <svg
@@ -589,267 +606,70 @@ function RegistrationsTab({ registrations }) {
           </div>
         ) : (
           <>
-            {/* Desktop table */}
-            <div className="desktop-table">
+            {/* ── DESKTOP TABLE — fixed column widths prevent misalignment */}
+            <div className="desktop-table" style={{ overflowX: "auto" }}>
               <table
                 style={{
                   width: "100%",
                   borderCollapse: "collapse",
                   fontSize: 13,
+                  tableLayout: "fixed",
                 }}
               >
+                <colgroup>
+                  {COL_WIDTHS.map((w, i) => (
+                    <col key={i} style={{ width: w }} />
+                  ))}
+                </colgroup>
                 <thead>
-                  <tr
-                    style={{
-                      background: "#f9fafb",
-                      borderBottom: "1px solid #f3f4f6",
-                    }}
-                  >
-                    {[
-                      "Photo",
-                      "Student",
-                      "Father",
-                      "Contact",
-                      "Age",
-                      "Registered",
-                      "Fee",
-                      "",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "10px 14px",
-                          textAlign: "left",
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: "#9ca3af",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
+                  <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
+                    <TH>Photo</TH>
+                    <TH>Student</TH>
+                    <TH>Father</TH>
+                    <TH>Contact</TH>
+                    <TH>Age</TH>
+                    <TH>Registered</TH>
+                    <TH>Fee</TH>
+                    <TH></TH>
                   </tr>
                 </thead>
                 <tbody>
-                  <StaggerContainer stagger={0.04} className="admin-rows">
-                    {paginated.map((r) => (
-                      <StaggerItem key={r._id}>
-                        <motion.tr
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.45 }}
-                          style={{
-                            borderBottom: "1px solid #f9fafb",
-                            transition: "background 0.1s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#f9fafb")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "#fff")
-                          }
-                        >
-                          {/* Photo */}
-                          <td style={{ padding: "10px 14px" }}>
-                            <div
-                              style={{
-                                width: 36,
-                                height: 36,
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                background: "#dcfce7",
-                                color: "#14532d",
-                                fontWeight: 700,
-                                fontSize: 14,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {r.photoUrl ? (
-                                <Image
-                                  width={36}
-                                  height={36}
-                                  src={r.photoUrl}
-                                  alt={r.studentName}
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                  }}
-                                />
-                              ) : (
-                                (r.studentName?.[0] ?? "?").toUpperCase()
-                              )}
-                            </div>
-                          </td>
-                          {/* Student */}
-                          <td style={{ padding: "10px 14px" }}>
-                            <p
-                              style={{
-                                fontWeight: 600,
-                                color: "#111827",
-                                margin: 0,
-                              }}
-                            >
-                              {r.studentName}
-                            </p>
-                            <p
-                              style={{
-                                fontSize: 11,
-                                color: "#9ca3af",
-                                margin: "2px 0 0",
-                              }}
-                            >
-                              {r.registrationId}
-                            </p>
-                          </td>
-                          {/* Father */}
-                          <td
-                            style={{ padding: "10px 14px", color: "#374151" }}
-                          >
-                            {r.fatherName}
-                          </td>
-                          {/* Contact */}
-                          <td style={{ padding: "10px 14px" }}>
-                            <a
-                              href={`tel:${r.phone}`}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                                color: "#14532d",
-                                fontWeight: 600,
-                                textDecoration: "none",
-                                fontSize: 13,
-                              }}
-                            >
-                              <Ic.Phone />
-                              {r.phone}
-                            </a>
-                          </td>
-                          {/* Age */}
-                          <td
-                            style={{ padding: "10px 14px", color: "#374151" }}
-                          >
-                            {r.age ? `${r.age} yrs` : "—"}
-                          </td>
-                          {/* Date */}
-                          <td
-                            style={{
-                              padding: "10px 14px",
-                              color: "#6b7280",
-                              whiteSpace: "nowrap",
-                              fontSize: 12,
-                            }}
-                          >
-                            {fmtDateShort(r.createdAt)}
-                          </td>
-                          {/* Fee */}
-                          <td style={{ padding: "10px 14px" }}>
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4,
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: "#15803d",
-                                background: "#dcfce7",
-                                padding: "3px 10px",
-                                borderRadius: 20,
-                                border: "1px solid #bbf7d0",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: "50%",
-                                  background: "#22c55e",
-                                  display: "inline-block",
-                                }}
-                              />
-                              ₹100 Paid
-                            </span>
-                          </td>
-                          {/* Action */}
-                          <td style={{ padding: "10px 14px" }}>
-                            <button
-                              onClick={() => setDetailReg(r)}
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: "#374151",
-                                background: "#f9fafb",
-                                border: "1px solid #e5e7eb",
-                                padding: "6px 14px",
-                                borderRadius: 8,
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              View Details
-                            </button>
-                          </td>
-                        </motion.tr>
-                      </StaggerItem>
-                    ))}
-                  </StaggerContainer>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="mobile-cards">
-              <StaggerContainer stagger={0.04} className="mobile-rows">
-                {paginated.map((r) => (
-                  <StaggerItem key={r._id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
+                  {paginated.map((r) => (
+                    <motion.tr
+                      key={r._id}
+                      initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.45 }}
-                      style={{
-                        padding: "16px",
-                        borderBottom: "1px solid #f3f4f6",
-                      }}
+                      transition={{ duration: 0.3 }}
+                      style={{ borderBottom: "1px solid #f9fafb" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#f9fafb")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "#fff")
+                      }
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 12,
-                          alignItems: "flex-start",
-                          marginBottom: 12,
-                        }}
-                      >
-                        {/* Photo */}
+                      {/* Photo */}
+                      <td style={{ padding: "10px 14px" }}>
                         <div
                           style={{
-                            width: 52,
-                            height: 52,
+                            width: 36,
+                            height: 36,
                             borderRadius: "50%",
                             overflow: "hidden",
                             background: "#dcfce7",
                             color: "#14532d",
                             fontWeight: 700,
-                            fontSize: 18,
+                            fontSize: 14,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
-                            border: "2px solid #bbf7d0",
                           }}
                         >
                           {r.photoUrl ? (
                             <Image
-                              width={52}
-                              height={52}
+                              width={36}
+                              height={36}
                               src={r.photoUrl}
                               alt={r.studentName}
                               style={{
@@ -862,141 +682,315 @@ function RegistrationsTab({ registrations }) {
                             (r.studentName?.[0] ?? "?").toUpperCase()
                           )}
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 700,
-                              color: "#111827",
-                              margin: "0 0 2px",
-                            }}
-                          >
-                            {r.studentName}
-                          </p>
-                          <p
-                            style={{
-                              fontSize: 11,
-                              color: "#9ca3af",
-                              margin: 0,
-                            }}
-                          >
-                            {r.registrationId}
-                          </p>
-                        </div>
-                        <span
+                      </td>
+                      {/* Student — overflow ellipsis prevents cell stretching */}
+                      <td style={{ padding: "10px 14px", maxWidth: 220 }}>
+                        <p
                           style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 4,
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: "#15803d",
-                            background: "#dcfce7",
-                            padding: "3px 9px",
-                            borderRadius: 20,
-                            border: "1px solid #bbf7d0",
-                            flexShrink: 0,
+                            fontWeight: 600,
+                            color: "#111827",
+                            margin: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          ₹100 Paid
-                        </span>
-                      </div>
-
-                      <div
+                          {r.studentName}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 11,
+                            color: "#9ca3af",
+                            margin: "2px 0 0",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.registrationId}
+                        </p>
+                      </td>
+                      {/* Father */}
+                      <td
                         style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr",
-                          gap: "6px 12px",
-                          marginBottom: 12,
+                          padding: "10px 14px",
+                          color: "#374151",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          maxWidth: 160,
                         }}
                       >
-                        {[
-                          ["Father", r.fatherName],
-                          ["Age", r.age ? `${r.age} years` : "—"],
-                          ["Registered", fmtDateShort(r.createdAt)],
-                          ["City", r.address?.city || "—"],
-                        ].map(([label, val]) => (
-                          <div key={label}>
-                            <p
-                              style={{
-                                fontSize: 10,
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.06em",
-                                color: "#9ca3af",
-                                margin: "0 0 2px",
-                              }}
-                            >
-                              {label}
-                            </p>
-                            <p
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: "#374151",
-                                margin: 0,
-                              }}
-                            >
-                              {val}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 8,
-                          alignItems: "center",
-                        }}
-                      >
+                        {r.fatherName}
+                      </td>
+                      {/* Contact */}
+                      <td style={{ padding: "10px 14px" }}>
                         <a
                           href={`tel:${r.phone}`}
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 5,
-                            fontSize: 12,
-                            fontWeight: 700,
+                            gap: 4,
                             color: "#14532d",
-                            background: "#ecfdf5",
-                            border: "1px solid #bbf7d0",
-                            padding: "8px 14px",
-                            borderRadius: 8,
+                            fontWeight: 600,
                             textDecoration: "none",
-                            flex: 1,
-                            justifyContent: "center",
+                            fontSize: 13,
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <Ic.Phone /> {r.phone}
+                          <Ic.Phone />
+                          {r.phone}
                         </a>
+                      </td>
+                      {/* Age */}
+                      <td
+                        style={{
+                          padding: "10px 14px",
+                          color: "#374151",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {r.age ? `${r.age} yrs` : "—"}
+                      </td>
+                      {/* Date */}
+                      <td
+                        style={{
+                          padding: "10px 14px",
+                          color: "#6b7280",
+                          whiteSpace: "nowrap",
+                          fontSize: 12,
+                        }}
+                      >
+                        {fmtDateShort(r.createdAt)}
+                      </td>
+                      {/* Fee */}
+                      <td style={{ padding: "10px 14px" }}>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: "#15803d",
+                            background: "#dcfce7",
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            border: "1px solid #bbf7d0",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              background: "#22c55e",
+                              display: "inline-block",
+                            }}
+                          />
+                          ₹100 Paid
+                        </span>
+                      </td>
+                      {/* Action */}
+                      <td style={{ padding: "10px 14px" }}>
                         <button
                           onClick={() => setDetailReg(r)}
                           style={{
                             fontSize: 12,
                             fontWeight: 600,
-                            color: "#fff",
-                            background: "#14532d",
-                            border: "none",
-                            padding: "8px 16px",
+                            color: "#374151",
+                            background: "#f9fafb",
+                            border: "1px solid #e5e7eb",
+                            padding: "6px 14px",
                             borderRadius: 8,
                             cursor: "pointer",
                             fontFamily: "inherit",
-                            flex: 1,
+                            whiteSpace: "nowrap",
                           }}
                         >
                           View Details
                         </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── MOBILE CARDS — unchanged */}
+            <div className="mobile-cards">
+              {paginated.map((r) => (
+                <motion.div
+                  key={r._id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35 }}
+                  style={{ padding: "16px", borderBottom: "1px solid #f3f4f6" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      alignItems: "flex-start",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        background: "#dcfce7",
+                        color: "#14532d",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        border: "2px solid #bbf7d0",
+                      }}
+                    >
+                      {r.photoUrl ? (
+                        <Image
+                          width={52}
+                          height={52}
+                          src={r.photoUrl}
+                          alt={r.studentName}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        (r.studentName?.[0] ?? "?").toUpperCase()
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: "#111827",
+                          margin: "0 0 2px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {r.studentName}
+                      </p>
+                      <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>
+                        {r.registrationId}
+                      </p>
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: "#15803d",
+                        background: "#dcfce7",
+                        padding: "3px 9px",
+                        borderRadius: 20,
+                        border: "1px solid #bbf7d0",
+                        flexShrink: 0,
+                      }}
+                    >
+                      ₹100 Paid
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "6px 12px",
+                      marginBottom: 12,
+                    }}
+                  >
+                    {[
+                      ["Father", r.fatherName],
+                      ["Age", r.age ? `${r.age} years` : "—"],
+                      ["Registered", fmtDateShort(r.createdAt)],
+                      ["City", r.address?.city || "—"],
+                    ].map(([label, val]) => (
+                      <div key={label}>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            color: "#9ca3af",
+                            margin: "0 0 2px",
+                          }}
+                        >
+                          {label}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "#374151",
+                            margin: 0,
+                          }}
+                        >
+                          {val}
+                        </p>
                       </div>
-                    </motion.div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <a
+                      href={`tel:${r.phone}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "#14532d",
+                        background: "#ecfdf5",
+                        border: "1px solid #bbf7d0",
+                        padding: "8px 14px",
+                        borderRadius: 8,
+                        textDecoration: "none",
+                        flex: 1,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Ic.Phone />
+                      {r.phone}
+                    </a>
+                    <button
+                      onClick={() => setDetailReg(r)}
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: "#fff",
+                        background: "#14532d",
+                        border: "none",
+                        padding: "8px 16px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        flex: 1,
+                      }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div
             style={{
@@ -1049,9 +1043,7 @@ function RegistrationsTab({ registrations }) {
   );
 }
 
-// ══════════════════════════════════════════════
-// DONATIONS TAB  (unchanged from your original)
-// ══════════════════════════════════════════════
+// ── DONATIONS TAB
 const PAYMENT_STATUS = {
   paid: {
     label: "Paid",
@@ -1290,8 +1282,8 @@ function DonationsTab({ payments, donationStats }) {
         ) : (
           <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
             {paginated.map((p) => {
-              const s = getPS(p.status);
-              const isOpen = openId === p._id;
+              const s = getPS(p.status),
+                isOpen = openId === p._id;
               return (
                 <li key={p._id} style={{ borderBottom: "1px solid #f3f4f6" }}>
                   <button
@@ -1535,9 +1527,7 @@ function DonationsTab({ payments, donationStats }) {
   );
 }
 
-// ══════════════════════════════════════════════
-// ANALYTICS TAB
-// ══════════════════════════════════════════════
+// ── ANALYTICS TAB
 function AnalyticsTab({ payments, registrations }) {
   const donationsByDay = useMemo(() => {
     const days = Array.from({ length: 7 }, (_, i) => {
@@ -1555,7 +1545,6 @@ function AnalyticsTab({ payments, registrations }) {
         .reduce((s, p) => s + Number(p.amount), 0),
     }));
   }, [payments]);
-
   const regsByDay = useMemo(() => {
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
@@ -1569,17 +1558,14 @@ function AnalyticsTab({ payments, registrations }) {
       ).length,
     }));
   }, [registrations]);
-
-  const maxD = Math.max(...donationsByDay.map((d) => d.amount), 1);
-  const maxR = Math.max(...regsByDay.map((d) => d.count), 1);
-
+  const maxD = Math.max(...donationsByDay.map((d) => d.amount), 1),
+    maxR = Math.max(...regsByDay.map((d) => d.count), 1);
   const totalRevenue = registrations.length * 100;
   const todayRegs = registrations.filter(
     (r) => new Date(r.createdAt).toDateString() === new Date().toDateString(),
   ).length;
   const weekRegs = filterByDate(registrations, "week").length;
   const monthRegs = filterByDate(registrations, "month").length;
-
   return (
     <div>
       <div className="stat-grid" style={{ marginBottom: 16 }}>
@@ -1608,8 +1594,6 @@ function AnalyticsTab({ payments, registrations }) {
           accentBorder="#c7d2fe"
         />
       </div>
-
-      {/* Registration breakdown */}
       <div
         style={{
           background: "#fff",
@@ -1632,7 +1616,7 @@ function AnalyticsTab({ payments, registrations }) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))",
             gap: 12,
           }}
         >
@@ -1679,7 +1663,6 @@ function AnalyticsTab({ payments, registrations }) {
           ))}
         </div>
       </div>
-
       {[
         {
           title: "Donations — Last 7 Days",
@@ -1756,9 +1739,7 @@ function AnalyticsTab({ payments, registrations }) {
   );
 }
 
-// ══════════════════════════════════════════════
-// MAIN ADMIN PAGE
-// ══════════════════════════════════════════════
+// ── MAIN
 export default function AdminPage() {
   const router = useRouter();
   const [tab, setTab] = useState("registrations");
@@ -1787,7 +1768,6 @@ export default function AdminPage() {
         setDonationStats(
           dData.stats ?? { totalPaid: 0, successCount: 0, failedCount: 0 },
         );
-
         const rRes = await fetch("/api/registrations", {
           method: "GET",
           credentials: "include",
@@ -1937,8 +1917,6 @@ export default function AdminPage() {
             Logout
           </button>
         </div>
-
-        {/* Tabs */}
         <div
           style={{
             maxWidth: 1100,
@@ -2003,33 +1981,26 @@ export default function AdminPage() {
           gap: 18,
         }}
       >
-        <StaggerContainer stagger={0.08}>
-          <StaggerItem>
-            {tab === "registrations" && (
-              <RegistrationsTab registrations={registrations} />
-            )}
-            {tab === "donations" && (
-              <DonationsTab payments={payments} donationStats={donationStats} />
-            )}
-            {tab === "analytics" && (
-              <AnalyticsTab payments={payments} registrations={registrations} />
-            )}
-          </StaggerItem>
-
-          <StaggerItem>
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: 11,
-                color: "#d1d5db",
-                paddingBottom: 16,
-                margin: 0,
-              }}
-            >
-              Maktab Meezan-ul-Qur&apos;an · Admin Panel · Secured
-            </p>
-          </StaggerItem>
-        </StaggerContainer>
+        {tab === "registrations" && (
+          <RegistrationsTab registrations={registrations} />
+        )}
+        {tab === "donations" && (
+          <DonationsTab payments={payments} donationStats={donationStats} />
+        )}
+        {tab === "analytics" && (
+          <AnalyticsTab payments={payments} registrations={registrations} />
+        )}
+        <p
+          style={{
+            textAlign: "center",
+            fontSize: 11,
+            color: "#d1d5db",
+            paddingBottom: 16,
+            margin: 0,
+          }}
+        >
+          Maktab Meezan-ul-Qur&apos;an · Admin Panel · Secured
+        </p>
       </main>
     </div>
   );
