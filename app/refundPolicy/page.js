@@ -1,6 +1,9 @@
+import { ScrollReveal } from "@/components/animations";
+
 export default function RefundPolicy() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-10 text-text-800">
+    <ScrollReveal>
+      <section className="max-w-5xl mx-auto px-6 py-10 text-text-800">
       <h1 className="text-4xl flex justify-center mb-8">
         Refund Policy
       </h1>
@@ -47,6 +50,7 @@ export default function RefundPolicy() {
           abulkalam.mumbai@gmail.com
         </span>
       </p>
-    </section>
+      </section>
+    </ScrollReveal>
   );
 }

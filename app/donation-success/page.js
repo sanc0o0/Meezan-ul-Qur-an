@@ -1,6 +1,7 @@
 import ShareButton from "./ShareButton";
 import Image from "next/image";
 import logo from "../../public/logo.png";
+import { ScrollReveal } from "@/components/animations";
 
 export default async function SuccessPage({ searchParams }) {
   const params = await searchParams;
@@ -11,9 +12,10 @@ export default async function SuccessPage({ searchParams }) {
   const donorName = params.name ? decodeURIComponent(params.name) : null;
 
   return (
-    <div className="min-h-screen bg-background-50 flex flex-col items-center justify-center px-6 py-16">
-      {/* Card */}
-      <div className="bg-white rounded-2xl shadow-xl border border-primary-100 max-w-md w-full px-8 py-10 text-center">
+    <ScrollReveal>
+      <div className="min-h-screen bg-background-50 flex flex-col items-center justify-center px-6 py-16">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-primary-100 max-w-md w-full px-8 py-10 text-center">
         <div className="w-30 h-30 bg-white border border-green-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
           <Image
             src={logo}
@@ -63,13 +65,15 @@ export default async function SuccessPage({ searchParams }) {
         </p>
       </div>
 
-      {/* Quranic note */}
-      <p className="text-center text-primary-700 text-xs mt-8 max-w-xs italic opacity-70">
+        </div>
+
+        {/* Quranic note */}
+        <p className="text-center text-primary-700 text-xs mt-8 max-w-xs italic opacity-70">
         &ldquo;Whoever saves one life, it is as if he has saved all of
         mankind.&rdquo;
         <br />
         <span className="not-italic">— Qur&apos;an 5:32</span>
       </p>
-    </div>
+    </ScrollReveal>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/animations";
 
 const PRESET_AMOUNTS = [100, 500, 1000, 5000];
 
@@ -201,7 +202,8 @@ export default function Donate() {
   return (
     <main className="bg-background-50 min-h-screen">
       {/* Hero */}
-      <section className="bg-primary-800 text-white py-16 px-6 text-center relative overflow-hidden">
+      <ScrollReveal>
+        <section className="bg-primary-800 text-white py-16 px-6 text-center relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -228,13 +230,15 @@ export default function Donate() {
             </div>
           ))}
         </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* Donation Card */}
-      <section
-        ref={formRef}
-        className="max-w-xl mx-auto px-4 -mt-6 relative z-10"
-      >
+      <ScrollReveal>
+        <section
+          ref={formRef}
+          className="max-w-xl mx-auto px-4 -mt-6 relative z-10"
+        >
         <div className="bg-white rounded-2xl shadow-xl border border-primary-100 p-6 md:p-8">
           {status === "cancelled" && (
             <div className="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-3 rounded-lg">
@@ -337,7 +341,8 @@ export default function Donate() {
             <LockIcon /> Secured by Razorpay · Your data is never shared
           </p>
         </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* Why Your Support Matters */}
       <section className="max-w-4xl mx-auto px-6 py-16">
@@ -348,24 +353,21 @@ export default function Donate() {
           Every donation, big or small, directly fuels Islamic education for
           children who need it most.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {TRUST_POINTS.map((p) => (
-            <div
-              key={p.title}
-              className="bg-white border border-primary-100 rounded-2xl p-5 flex gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <TrustIcon name={p.icon} />
-              <div>
-                <h3 className="font-semibold text-primary-800 text-sm mb-1">
-                  {p.title}
-                </h3>
-                <p className="text-text-500 text-xs leading-relaxed">
-                  {p.desc}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <StaggerContainer stagger={0.12}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {TRUST_POINTS.map((p) => (
+              <StaggerItem key={p.title}>
+                <div className="bg-white border border-primary-100 rounded-2xl p-5 flex gap-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                  <TrustIcon name={p.icon} />
+                  <div>
+                    <h3 className="font-semibold text-primary-800 text-sm mb-1">{p.title}</h3>
+                    <p className="text-text-500 text-xs leading-relaxed">{p.desc}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </div>
+        </StaggerContainer>
       </section>
     </main>
   );

@@ -1,6 +1,7 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageTransition } from "@/components/animations";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
@@ -19,7 +20,9 @@ export default function RootLayout({ children }) {
       >
         <Navbar />
 
-        <main className="grow">{children}</main>
+        <main className="grow">
+          <PageTransition>{children}</PageTransition>
+        </main>
 
         <Footer />
         <Analytics />
