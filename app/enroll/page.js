@@ -48,6 +48,183 @@ const INDIAN_STATES = [
   "Puducherry",
 ];
 
+// ─────────────────────────────────────────────
+// CLIENT-SIDE SANITIZATION  (mirrors server lib)
+// ─────────────────────────────────────────────
+function sanitizeString(raw) {
+  if (typeof raw !== "string") return "";
+  return raw
+    .replace(/\0/g, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+    .trim();
+}
+function sanitizeDigits(raw) {
+  return typeof raw === "string" ? raw.replace(/\D/g, "") : "";
+}
+
+// ─────────────────────────────────────────────
+// ATTACK / GARBAGE DETECTION
+// ─────────────────────────────────────────────
+const ATTACK_PATTERNS = [
+  /(\b)(select|insert|update|delete|drop|truncate|alter|exec|union|declare)\b/i,
+  /(['";])\s*(--|#|\/\*)/,
+  /\b(or|and)\b\s+\d+\s*=\s*\d+/i,
+  /<\s*script/i,
+  /javascript\s*:/i,
+  /on\w+\s*=/i,
+  /\{\{.*\}\}/,
+  /\$\{.*\}/,
+];
+const GARBAGE_NAMES = [
+  /^(test|fake|dummy|asdf|qwerty|abc|xyz|aaa|bbb|xxx|null|undefined|none|na|n\/a)$/i,
+  /^(.)\1{4,}$/,
+  /^[^a-zA-Z\u0600-\u06FF\u0900-\u097F\s]+$/,
+];
+function looksLikeAttack(v) {
+  return typeof v === "string" && ATTACK_PATTERNS.some((r) => r.test(v));
+}
+function looksLikeFakeName(v) {
+  return typeof v === "string" && GARBAGE_NAMES.some((r) => r.test(v.trim()));
+}
+
+// ─────────────────────────────────────────────
+// FIELD VALIDATORS
+// ─────────────────────────────────────────────
+function validateName(raw, label) {
+  const v = sanitizeString(raw);
+  if (!v) return `${label} is required`;
+  if (v.length < 2) return `${label} must be at least 2 characters`;
+  if (v.length > 100) return `${label} must be under 100 characters`;
+  if (looksLikeAttack(raw)) return `${label} contains invalid characters`;
+  if (looksLikeFakeName(v)) return `Please enter a real ${label.toLowerCase()}`;
+  if (!/^[\p{L}\s''\-\.]+$/u.test(v))
+    return `${label} may only contain letters, spaces, hyphens, and apostrophes`;
+  return null;
+}
+function validatePhone(raw, required = true) {
+  const v = sanitizeDigits(raw);
+  if (!v) return required ? "Phone number is required" : null;
+  if (!/^[6-9]\d{9}$/.test(v))
+    return "Enter a valid 10-digit Indian mobile number";
+  return null;
+}
+function validateEmail(raw, required = false) {
+  const v = sanitizeString(raw);
+  if (!v) return required ? "Email is required" : null;
+  if (looksLikeAttack(raw)) return "Email contains invalid characters";
+  if (!/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/.test(v))
+    return "Enter a valid email address";
+  return null;
+}
+function validateDob(raw) {
+  if (!raw) return "Date of birth is required";
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return "Enter a valid date of birth";
+  const now = new Date();
+  const age = now.getFullYear() - d.getFullYear();
+  if (d > now) return "Date of birth cannot be in the future";
+  if (age > 18) return "Student must be 18 years old or younger";
+  if (age < 3) return "Student must be at least 3 years old";
+  return null;
+}
+function validateText(raw, label, opts = {}) {
+  const { required = false, maxLen = 150 } = opts;
+  const v = sanitizeString(raw);
+  if (!v) return required ? `${label} is required` : null;
+  if (looksLikeAttack(raw)) return `${label} contains invalid characters`;
+  if (v.length > maxLen) return `${label} must be under ${maxLen} characters`;
+  return null;
+}
+function validatePinCode(raw) {
+  const v = sanitizeDigits(raw);
+  if (!v) return "PIN code is required";
+  if (!/^\d{6}$/.test(v)) return "Enter a valid 6-digit PIN code";
+  return null;
+}
+
+// ─────────────────────────────────────────────
+// STEP VALIDATORS — mirror server exactly
+// ─────────────────────────────────────────────
+function validateStep(step, form, termsAccepted) {
+  const e = {};
+
+  if (step === 0) {
+    const sn = validateName(form.studentName, "Student name");
+    if (sn) e.studentName = sn;
+
+    const dob = validateDob(form.dob);
+    if (dob) e.dob = dob;
+
+    const genderOk = ["male", "female", "other"].includes(form.gender);
+    if (!genderOk) e.gender = "Please select a gender";
+
+    const fn = validateName(form.fatherName, "Father's name");
+    if (fn) e.fatherName = fn;
+
+    const mn = validateName(form.motherName, "Mother's name");
+    if (mn) e.motherName = mn;
+
+    const occ = validateText(form.guardianOccupation, "Occupation", {
+      maxLen: 100,
+    });
+    if (occ) e.guardianOccupation = occ;
+
+    const ph = validatePhone(form.phone, true);
+    if (ph) e.phone = ph;
+
+    const aph = validatePhone(form.alternatePhone, false);
+    if (aph) e.alternatePhone = aph;
+
+    const eph = validatePhone(form.emergencyContact, false);
+    if (eph) e.emergencyContact = eph;
+
+    const em = validateEmail(form.email, false);
+    if (em) e.email = em;
+
+    const relOk = ["father", "mother", "other"].includes(form.guardianRelation);
+    if (!relOk) e.guardianRelation = "Please select a relationship";
+
+    const gn = validateName(form.guardianName, "Guardian name");
+    if (gn) e.guardianName = gn;
+
+    const ge = validateEmail(form.guardianEmail, false);
+    if (ge) e.guardianEmail = ge;
+  }
+
+  if (step === 1) {
+    const hn = validateText(form.houseNumber, "House number", {
+      required: true,
+      maxLen: 150,
+    });
+    if (hn) e.houseNumber = hn;
+
+    const vl = validateText(form.village, "Village / locality", {
+      required: true,
+      maxLen: 150,
+    });
+    if (vl) e.village = vl;
+
+    const ct = validateText(form.city, "City", { required: true, maxLen: 100 });
+    if (ct) e.city = ct;
+
+    const pin = validatePinCode(form.pinCode);
+    if (pin) e.pinCode = pin;
+
+    if (!form.state || !INDIAN_STATES.includes(form.state))
+      e.state = "Please select a state";
+  }
+
+  if (step === 2) {
+    if (!termsAccepted) e.terms = "You must accept the terms to proceed";
+  }
+
+  return e;
+}
+
+// ─────────────────────────────────────────────
+// SVG ICONS
+// ─────────────────────────────────────────────
 const SVG = {
   Mosque: () => (
     <svg
@@ -177,6 +354,22 @@ const SVG = {
     >
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12,5 19,12 12,19" />
+    </svg>
+  ),
+  Alert: () => (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
     </svg>
   ),
   Students: () => (
@@ -359,6 +552,9 @@ const SVG = {
   ),
 };
 
+// ─────────────────────────────────────────────
+// ETHEREAL BACKGROUND
+// ─────────────────────────────────────────────
 function EtherealBackground() {
   const feColorMatrixRef = useRef(null);
   const animFrameRef = useRef(0);
@@ -463,6 +659,9 @@ function EtherealBackground() {
   );
 }
 
+// ─────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────
 const S = {
   input: {
     width: "100%",
@@ -484,7 +683,7 @@ const S = {
     border: "1px solid #ef4444",
     fontSize: 14,
     color: "#111827",
-    background: "#fff1f1",
+    background: "#fff8f8",
     outline: "none",
     boxSizing: "border-box",
     fontFamily: "inherit",
@@ -498,7 +697,14 @@ const S = {
     letterSpacing: "0.02em",
   },
   required: { color: "#ef4444", marginLeft: 2 },
-  error: { fontSize: 11, color: "#ef4444", marginTop: 4 },
+  error: {
+    fontSize: 11,
+    color: "#ef4444",
+    marginTop: 4,
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+  },
   btn: {
     padding: "11px 28px",
     borderRadius: 10,
@@ -517,7 +723,10 @@ const S = {
   },
 };
 
-function Field({ label, required, error, children }) {
+// ─────────────────────────────────────────────
+// FIELD COMPONENT
+// ─────────────────────────────────────────────
+function Field({ label, required, error, hint, children }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={S.label}>
@@ -525,11 +734,22 @@ function Field({ label, required, error, children }) {
         {required && <span style={S.required}>*</span>}
       </label>
       {children}
-      {error && <p style={S.error}>{error}</p>}
+      {hint && !error && (
+        <p style={{ fontSize: 11, color: "#92a758", marginTop: 4 }}>{hint}</p>
+      )}
+      {error && (
+        <p style={S.error}>
+          <SVG.Alert />
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
+// ─────────────────────────────────────────────
+// STEP BAR
+// ─────────────────────────────────────────────
 function StepBar({ current }) {
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 32 }}>
@@ -599,13 +819,15 @@ function StepBar({ current }) {
   );
 }
 
+// ─────────────────────────────────────────────
+// STATIC DATA
+// ─────────────────────────────────────────────
 const METRICS = [
   { icon: <SVG.Students />, value: "150+", label: "Students Learning" },
   { icon: <SVG.GradCap />, value: "3+", label: "Years of Service" },
   { icon: <SVG.QuranBook />, value: "Qualified", label: "Islamic Teachers" },
   { icon: <SVG.Lock />, value: "100%", label: "Secure Registration" },
 ];
-
 const WHY_CARDS = [
   {
     icon: <SVG.GradCap />,
@@ -628,7 +850,6 @@ const WHY_CARDS = [
     desc: "A structured, nurturing and respectful space where every child feels secure and valued.",
   },
 ];
-
 const HOW_STEPS = [
   {
     icon: <SVG.FormIcon />,
@@ -652,13 +873,17 @@ const HOW_STEPS = [
   },
 ];
 
+// ─────────────────────────────────────────────
+// MAIN PAGE
+// ─────────────────────────────────────────────
 export default function EnrollPage() {
   const router = useRouter();
-  const formRef = useRef(null); // wraps entire form section
-  const formCardRef = useRef(null); // the white card — scroll target on step change
+  const formRef = useRef(null);
+  const formCardRef = useRef(null);
 
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({}); // track blur for inline feedback
   const [submitting, setSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState("");
   const pendingRegId = useRef(null);
@@ -692,19 +917,29 @@ export default function EnrollPage() {
     photoUrl: "",
   });
 
+  // ── Helpers ─────────────────────────────────
   const set = (key, val) => {
     setFormState((f) => ({ ...f, [key]: val }));
-    setErrors((e) => ({ ...e, [key]: "" }));
+    // Clear error as soon as user starts editing again
+    setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
-  // ── Scroll to the form card top, not window top
+  const touch = (key) => setTouched((t) => ({ ...t, [key]: true }));
+
+  // Inline validation on blur — only for fields already touched
+  const handleBlur = (key) => {
+    touch(key);
+    const stepErrors = validateStep(step, form, termsAccepted);
+    if (stepErrors[key]) setErrors((e) => ({ ...e, [key]: stepErrors[key] }));
+  };
+
   const scrollToFormCard = () => {
     if (formCardRef.current) {
-      const NAVBAR_HEIGHT = 80; // adjust to match your navbar height
+      const NAVBAR = 80;
       const top =
         formCardRef.current.getBoundingClientRect().top +
         window.scrollY -
-        NAVBAR_HEIGHT -
+        NAVBAR -
         16;
       window.scrollTo({ top, behavior: "smooth" });
     }
@@ -712,16 +947,17 @@ export default function EnrollPage() {
 
   const scrollToForm = () => {
     if (formRef.current) {
-      const NAVBAR_HEIGHT = 80;
+      const NAVBAR = 80;
       const top =
         formRef.current.getBoundingClientRect().top +
         window.scrollY -
-        NAVBAR_HEIGHT -
+        NAVBAR -
         16;
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
 
+  // ── DOB auto-age ─────────────────────────────
   const handleDobChange = (val) => {
     set("dob", val);
     if (val) {
@@ -734,6 +970,7 @@ export default function EnrollPage() {
     }
   };
 
+  // ── Guardian relation helper ─────────────────
   const handleGuardianRelationChange = (val) => {
     set("guardianRelation", val);
     if (val === "father" && !form.guardianName)
@@ -742,6 +979,19 @@ export default function EnrollPage() {
       set("guardianName", form.motherName);
   };
 
+  // ── Phone-only digits ────────────────────────
+  const handlePhoneInput = (key, e) => {
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
+    set(key, digitsOnly);
+  };
+
+  // ── PIN-only digits ──────────────────────────
+  const handlePinInput = (e) => {
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 6);
+    set("pinCode", digitsOnly);
+  };
+
+  // ── Photo ────────────────────────────────────
   const processFile = (file) => {
     const allowed = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowed.includes(file.type)) {
@@ -752,11 +1002,10 @@ export default function EnrollPage() {
       setErrors((e) => ({ ...e, photo: "File must be under 5 MB" }));
       return;
     }
-    setErrors((e) => ({ ...e, photo: "" }));
+    setErrors((e) => ({ ...e, photo: undefined }));
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
   };
-
   const handlePhotoChange = (e) => {
     const f = e.target.files?.[0];
     if (f) processFile(f);
@@ -790,49 +1039,19 @@ export default function EnrollPage() {
     }
   };
 
-  const validate = (s) => {
-    const e = {};
-    if (s === 0) {
-      if (!form.studentName.trim()) e.studentName = "Student name is required";
-      if (!form.dob) e.dob = "Date of birth is required";
-      if (!form.gender) e.gender = "Gender is required";
-      if (!form.fatherName.trim()) e.fatherName = "Father's name is required";
-      if (!form.motherName.trim()) e.motherName = "Mother's name is required";
-      if (!form.phone.trim()) e.phone = "Phone number is required";
-      else if (!/^[6-9]\d{9}$/.test(form.phone.replace(/\s/g, "")))
-        e.phone = "Enter a valid 10-digit Indian mobile number";
-      if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-        e.email = "Enter a valid email address";
-      if (!form.guardianRelation)
-        e.guardianRelation = "Please select a relationship";
-      if (!form.guardianName.trim())
-        e.guardianName = "Guardian name is required";
-      if (
-        form.guardianEmail &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.guardianEmail)
-      )
-        e.guardianEmail = "Enter a valid email address";
-    }
-    if (s === 1) {
-      if (!form.houseNumber.trim()) e.houseNumber = "Required";
-      if (!form.village.trim()) e.village = "Required";
-      if (!form.city.trim()) e.city = "Required";
-      if (!form.state) e.state = "Required";
-      if (!form.pinCode.trim()) e.pinCode = "Required";
-      else if (!/^\d{6}$/.test(form.pinCode))
-        e.pinCode = "6-digit PIN required";
-    }
-    if (s === 2) {
-      if (!termsAccepted) e.terms = "You must accept the terms to proceed";
-    }
-    return e;
-  };
-
-  // ── next/back scroll to the card, NOT to window top
+  // ── Navigation ───────────────────────────────
   const next = () => {
-    const e = validate(step);
-    if (Object.keys(e).length) {
-      setErrors(e);
+    // Mark all current-step fields as touched so errors show
+    const stepErrors = validateStep(step, form, termsAccepted);
+    if (Object.keys(stepErrors).length) {
+      setErrors(stepErrors);
+      // Scroll to first error
+      const firstKey = Object.keys(stepErrors)[0];
+      const el = document.querySelector(`[data-field="${firstKey}"]`);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 120;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
       return;
     }
     setErrors({});
@@ -846,12 +1065,14 @@ export default function EnrollPage() {
     scrollToFormCard();
   };
 
+  // ── Payment ──────────────────────────────────
   const handlePayment = async () => {
-    const e = validate(2);
-    if (Object.keys(e).length) {
-      setErrors(e);
+    const stepErrors = validateStep(2, form, termsAccepted);
+    if (Object.keys(stepErrors).length) {
+      setErrors(stepErrors);
       return;
     }
+
     setSubmitting(true);
     setGlobalError("");
     try {
@@ -877,12 +1098,12 @@ export default function EnrollPage() {
           motherName: form.motherName,
           guardianOccupation: form.guardianOccupation,
           phone: form.phone,
-          guardianName: form.guardianName,
-          guardianRelation: form.guardianRelation,
-          guardianEmail: form.guardianEmail,
           alternatePhone: form.alternatePhone,
           email: form.email,
           emergencyContact: form.emergencyContact,
+          guardianName: form.guardianName,
+          guardianRelation: form.guardianRelation,
+          guardianEmail: form.guardianEmail,
           address: {
             houseNumber: form.houseNumber,
             village: form.village,
@@ -893,7 +1114,60 @@ export default function EnrollPage() {
         }),
       });
       const regData = await regRes.json();
+
+      // Server returned field-level validation errors
+      if (regRes.status === 422 && regData.fields) {
+        setErrors(regData.fields);
+        // Go back to the relevant step
+        const field = Object.keys(regData.fields)[0];
+        const step0Fields = [
+          "studentName",
+          "dob",
+          "age",
+          "gender",
+          "fatherName",
+          "motherName",
+          "guardianOccupation",
+          "phone",
+          "alternatePhone",
+          "emergencyContact",
+          "email",
+          "guardianRelation",
+          "guardianName",
+          "guardianEmail",
+        ];
+        const step1Fields = [
+          "houseNumber",
+          "village",
+          "city",
+          "state",
+          "pinCode",
+        ];
+        if (step0Fields.includes(field)) setStep(0);
+        else if (step1Fields.includes(field)) setStep(1);
+        setGlobalError(
+          "Some fields need correction — please review and resubmit.",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      if (regRes.status === 409) {
+        setGlobalError(regData.error || "Duplicate registration detected.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (regRes.status === 429) {
+        setGlobalError(
+          "Registration limit reached. Please try again tomorrow.",
+        );
+        setSubmitting(false);
+        return;
+      }
+
       if (!regRes.ok) throw new Error(regData.error || "Registration failed");
+
       const { registrationId } = regData;
       pendingRegId.current = registrationId;
 
@@ -971,24 +1245,42 @@ export default function EnrollPage() {
     }
   };
 
+  // ── Render helpers ───────────────────────────
   const inp = (key, props = {}) => (
     <input
       {...props}
+      data-field={key}
       value={form[key]}
       onChange={(e) => set(key, e.target.value)}
+      onBlur={() => handleBlur(key)}
       style={errors[key] ? S.inputError : S.input}
     />
   );
+
+  const phoneInp = (key, props = {}) => (
+    <input
+      {...props}
+      data-field={key}
+      value={form[key]}
+      inputMode="numeric"
+      onChange={(e) => handlePhoneInput(key, e)}
+      onBlur={() => handleBlur(key)}
+      style={errors[key] ? S.inputError : S.input}
+    />
+  );
+
   const sel = (key, options, placeholder) => (
     <select
+      data-field={key}
       value={form[key]}
       onChange={(e) => set(key, e.target.value)}
+      onBlur={() => handleBlur(key)}
       style={{ ...(errors[key] ? S.inputError : S.input), cursor: "pointer" }}
     >
       <option value="">{placeholder}</option>
       {options.map((o) =>
         typeof o === "string" ? (
-          <option key={o} value={o.toLowerCase()}>
+          <option key={o} value={o}>
             {o}
           </option>
         ) : (
@@ -999,17 +1291,21 @@ export default function EnrollPage() {
       )}
     </select>
   );
+
   const grid2 = {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "0 16px",
   };
 
+  // Count errors on current step for the error summary badge
+  const errorCount = Object.values(errors).filter(Boolean).length;
+
   return (
     <>
       <script src="https://checkout.razorpay.com/v1/checkout.js" async />
       <div style={{ background: "#f4f7ee", minHeight: "100vh" }}>
-        {/* HERO */}
+        {/* ── HERO ── */}
         <ScrollReveal>
           <section
             style={{
@@ -1097,7 +1393,7 @@ export default function EnrollPage() {
           </section>
         </ScrollReveal>
 
-        {/* TRUST METRICS */}
+        {/* ── TRUST METRICS ── */}
         <ScrollReveal>
           <section
             style={{ background: "#fff", borderBottom: "1px solid #e9efdc" }}
@@ -1109,7 +1405,6 @@ export default function EnrollPage() {
                 padding: "32px 24px",
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                gap: 0,
               }}
             >
               {METRICS.map(({ icon, value, label }, i) => (
@@ -1158,7 +1453,7 @@ export default function EnrollPage() {
           </section>
         </ScrollReveal>
 
-        {/* WHY CHOOSE US */}
+        {/* ── WHY CHOOSE US ── */}
         <ScrollReveal>
           <section
             style={{ maxWidth: 960, margin: "0 auto", padding: "56px 24px" }}
@@ -1242,7 +1537,7 @@ export default function EnrollPage() {
           </section>
         </ScrollReveal>
 
-        {/* HOW IT WORKS */}
+        {/* ── HOW IT WORKS ── */}
         <ScrollReveal>
           <section
             style={{
@@ -1335,7 +1630,7 @@ export default function EnrollPage() {
           </section>
         </ScrollReveal>
 
-        {/* FORM — ref on the outer wrapper for "Start Registration" CTA */}
+        {/* ── FORM ── */}
         <ScrollReveal>
           <div
             ref={formRef}
@@ -1377,7 +1672,6 @@ export default function EnrollPage() {
               </p>
             </div>
 
-            {/* ── formCardRef goes on the white card so next/back scroll here */}
             <div
               ref={formCardRef}
               style={{
@@ -1390,23 +1684,51 @@ export default function EnrollPage() {
             >
               <StepBar current={step} />
 
+              {/* Global error banner */}
               {globalError && (
                 <div
                   style={{
                     background: "#fef2f2",
                     border: "1px solid #fecaca",
-                    borderRadius: 8,
-                    padding: "10px 14px",
+                    borderRadius: 10,
+                    padding: "12px 14px",
                     marginBottom: 20,
                     fontSize: 13,
                     color: "#dc2626",
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "flex-start",
                   }}
                 >
-                  {globalError}
+                  <SVG.Alert />
+                  <span>{globalError}</span>
                 </div>
               )}
 
-              {/* STEP 0 */}
+              {/* Error count summary — appears when Next is clicked with errors */}
+              {errorCount > 0 && (
+                <div
+                  style={{
+                    background: "#fffbeb",
+                    border: "1px solid #fde68a",
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    marginBottom: 20,
+                    fontSize: 12,
+                    color: "#92400e",
+                    display: "flex",
+                    gap: 6,
+                    alignItems: "center",
+                  }}
+                >
+                  <SVG.Alert />
+                  {errorCount} field{errorCount > 1 ? "s" : ""} need
+                  {errorCount === 1 ? "s" : ""} correction before you can
+                  continue.
+                </div>
+              )}
+
+              {/* ── STEP 0: Student Info ── */}
               {step === 0 && (
                 <div>
                   <h3
@@ -1419,6 +1741,7 @@ export default function EnrollPage() {
                   >
                     Student Information
                   </h3>
+
                   <Field
                     label="Student Full Name"
                     required
@@ -1426,27 +1749,36 @@ export default function EnrollPage() {
                   >
                     {inp("studentName", {
                       placeholder: "Enter student's full name",
+                      autoComplete: "off",
                     })}
                   </Field>
+
                   <div style={grid2}>
                     <Field label="Date of Birth" required error={errors.dob}>
                       <input
+                        data-field="dob"
                         type="date"
                         value={form.dob}
                         onChange={(e) => handleDobChange(e.target.value)}
+                        onBlur={() => handleBlur("dob")}
                         max={new Date().toISOString().split("T")[0]}
                         style={errors.dob ? S.inputError : S.input}
                       />
                     </Field>
-                    <Field label="Age" error={errors.age}>
+                    <Field label="Age" hint="Auto-calculated from DOB">
                       <input
                         value={form.age}
                         readOnly
-                        placeholder="Auto-calculated"
-                        style={{ ...S.input, background: "#f4f7ee" }}
+                        placeholder="—"
+                        style={{
+                          ...S.input,
+                          background: "#f4f7ee",
+                          color: "#6b7280",
+                        }}
                       />
                     </Field>
                   </div>
+
                   <Field label="Gender" required error={errors.gender}>
                     {sel(
                       "gender",
@@ -1458,6 +1790,7 @@ export default function EnrollPage() {
                       "Select gender",
                     )}
                   </Field>
+
                   <div style={grid2}>
                     <Field
                       label="Father's Name"
@@ -1474,6 +1807,7 @@ export default function EnrollPage() {
                       {inp("motherName", { placeholder: "Mother's full name" })}
                     </Field>
                   </div>
+
                   <Field
                     label="Guardian's Occupation"
                     error={errors.guardianOccupation}
@@ -1482,39 +1816,33 @@ export default function EnrollPage() {
                       placeholder: "e.g. Farmer, Teacher, Business",
                     })}
                   </Field>
+
                   <Field
                     label="Primary Contact Number"
                     required
                     error={errors.phone}
+                    hint="10-digit Indian mobile number starting with 6–9"
                   >
-                    {inp("phone", {
-                      type: "tel",
-                      placeholder: "10-digit mobile number",
-                      maxLength: 10,
-                    })}
+                    {phoneInp("phone", { placeholder: "e.g. 9876543210" })}
                   </Field>
+
                   <div style={grid2}>
                     <Field
                       label="Alternate Phone"
                       error={errors.alternatePhone}
                     >
-                      {inp("alternatePhone", {
-                        type: "tel",
-                        placeholder: "Optional",
-                        maxLength: 10,
-                      })}
+                      {phoneInp("alternatePhone", { placeholder: "Optional" })}
                     </Field>
                     <Field
                       label="Emergency Contact"
                       error={errors.emergencyContact}
                     >
-                      {inp("emergencyContact", {
-                        type: "tel",
+                      {phoneInp("emergencyContact", {
                         placeholder: "Optional",
-                        maxLength: 10,
                       })}
                     </Field>
                   </div>
+
                   <Field label="Email Address" error={errors.email}>
                     {inp("email", { type: "email", placeholder: "Optional" })}
                   </Field>
@@ -1555,16 +1883,19 @@ export default function EnrollPage() {
                       </p>
                     </div>
                   </div>
+
                   <Field
                     label="Guardian Relationship"
                     required
                     error={errors.guardianRelation}
                   >
                     <select
+                      data-field="guardianRelation"
                       value={form.guardianRelation}
                       onChange={(e) =>
                         handleGuardianRelationChange(e.target.value)
                       }
+                      onBlur={() => handleBlur("guardianRelation")}
                       style={{
                         ...(errors.guardianRelation ? S.inputError : S.input),
                         cursor: "pointer",
@@ -1578,6 +1909,7 @@ export default function EnrollPage() {
                       </option>
                     </select>
                   </Field>
+
                   <Field
                     label="Guardian Full Name"
                     required
@@ -1592,16 +1924,21 @@ export default function EnrollPage() {
                             : "Full name of the responsible person",
                     })}
                   </Field>
-                  <Field label="Guardian Email" error={errors.guardianEmail}>
+
+                  <Field
+                    label="Guardian Email"
+                    error={errors.guardianEmail}
+                    hint="Receipt and updates will be sent here"
+                  >
                     {inp("guardianEmail", {
                       type: "email",
-                      placeholder: "Receipt & updates will be sent here",
+                      placeholder: "Optional but recommended",
                     })}
                   </Field>
                 </div>
               )}
 
-              {/* STEP 1 */}
+              {/* ── STEP 1: Address ── */}
               {step === 1 && (
                 <div>
                   <h3
@@ -1614,6 +1951,7 @@ export default function EnrollPage() {
                   >
                     Address Information
                   </h3>
+
                   <Field
                     label="House Number / Area"
                     required
@@ -1637,10 +1975,15 @@ export default function EnrollPage() {
                       {inp("city", { placeholder: "City name" })}
                     </Field>
                     <Field label="PIN Code" required error={errors.pinCode}>
-                      {inp("pinCode", {
-                        placeholder: "6-digit PIN",
-                        maxLength: 6,
-                      })}
+                      <input
+                        data-field="pinCode"
+                        value={form.pinCode}
+                        inputMode="numeric"
+                        onChange={handlePinInput}
+                        onBlur={() => handleBlur("pinCode")}
+                        placeholder="6-digit PIN"
+                        style={errors.pinCode ? S.inputError : S.input}
+                      />
                     </Field>
                   </div>
                   <Field label="State" required error={errors.state}>
@@ -1649,7 +1992,7 @@ export default function EnrollPage() {
                 </div>
               )}
 
-              {/* STEP 2 */}
+              {/* ── STEP 2: Photo + Terms ── */}
               {step === 2 && (
                 <div>
                   <h3
@@ -1662,6 +2005,7 @@ export default function EnrollPage() {
                   >
                     Photo & Terms
                   </h3>
+
                   <Field label="Student Photograph" error={errors.photo}>
                     <div
                       onClick={() => fileInputRef.current?.click()}
@@ -1748,6 +2092,8 @@ export default function EnrollPage() {
                       style={{ display: "none" }}
                     />
                   </Field>
+
+                  {/* Terms */}
                   <div
                     style={{
                       background: "#f4f7ee",
@@ -1820,7 +2166,7 @@ export default function EnrollPage() {
                       }}
                       onClick={() => {
                         setTermsAccepted(!termsAccepted);
-                        setErrors((e) => ({ ...e, terms: "" }));
+                        setErrors((e) => ({ ...e, terms: undefined }));
                       }}
                     >
                       <div
@@ -1850,9 +2196,14 @@ export default function EnrollPage() {
                       </p>
                     </div>
                     {errors.terms && (
-                      <p style={{ ...S.error, marginTop: 6 }}>{errors.terms}</p>
+                      <p style={{ ...S.error, marginTop: 6 }}>
+                        <SVG.Alert />
+                        {errors.terms}
+                      </p>
                     )}
                   </div>
+
+                  {/* Summary */}
                   <div
                     style={{
                       background: "#ecfdf5",
@@ -1913,7 +2264,7 @@ export default function EnrollPage() {
                 </div>
               )}
 
-              {/* STEP 3 */}
+              {/* ── STEP 3: Payment ── */}
               {step === 3 && (
                 <div style={{ textAlign: "center" }}>
                   <div
@@ -2045,7 +2396,7 @@ export default function EnrollPage() {
                 </div>
               )}
 
-              {/* Navigation */}
+              {/* ── Navigation ── */}
               {step < 3 && (
                 <div
                   style={{
@@ -2076,7 +2427,7 @@ export default function EnrollPage() {
                     onClick={
                       step === 2
                         ? () => {
-                            const e = validate(2);
+                            const e = validateStep(2, form, termsAccepted);
                             if (Object.keys(e).length) {
                               setErrors(e);
                               return;
